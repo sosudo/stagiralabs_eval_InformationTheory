@@ -101,19 +101,46 @@ theorem swap_hammingDist : swap (@hammingDist _ β _ _) = hammingDist := by
 
 /-- Corresponds to `eq_of_dist_eq_zero`. -/
 @[target]
-theorem eq_of_hammingDist_eq_zero {x y : ∀ i, β i} : hammingDist x y = 0 → x = y := by sorry
+theorem eq_of_hammingDist_eq_zero {x y : ∀ i, β i} : hammingDist x y = 0 → x = y := by
+  intro h
+  have hzero : (Finset.filter (fun i => x i ≠ y i) (Finset.univ)).card = 0 := by
+    simpa [hammingDist] using h
+  have hempty : (Finset.filter (fun i => x i ≠ y i) (Finset.univ)) = ∅ :=
+    Finset.card_eq_zero.mp hzero
+  funext i
+  have : i ∉ (Finset.filter (fun i => x i ≠ y i) (Finset.univ)) := by
+    simpa [hempty] using (by simp)
+  by_contra hneq
+  have : i ∈ (Finset.filter (fun i => x i ≠ y i) (Finset.univ)) := by
+    apply Finset.mem_filter.mpr
+    exact ⟨Finset.mem_univ i, hneq⟩
+  exact this.elim
 
 /-- Corresponds to `dist_eq_zero`. -/
 @[target, simp]
-theorem hammingDist_eq_zero {x y : ∀ i, β i} : hammingDist x y = 0 ↔ x = y := by sorry
+theorem hammingDist_eq_zero {x y : ∀ i, β i} : hammingDist x y = 0 ↔ x = y := by
+  constructor
+  · intro h
+    exact (eq_of_hammingDist_eq_zero (x:=x) (y:=y) h)
+  · intro h
+    simpa [h] using (hammingDist_self (x:=x))
 
 /-- Corresponds to `zero_eq_dist`. -/
 @[target, simp]
-theorem hamming_zero_eq_dist {x y : ∀ i, β i} : 0 = hammingDist x y ↔ x = y := by sorry
+theorem hamming_zero_eq_dist {x y : ∀ i, β i} : 0 = hammingDist x y ↔ x = y := by
+  simpa [eq_comm] using (hammingDist_eq_zero (x:=x) (y:=y))
 
 /-- Corresponds to `dist_ne_zero`. -/
 @[target]
-theorem hammingDist_ne_zero {x y : ∀ i, β i} : hammingDist x y ≠ 0 ↔ x ≠ y := by sorry
+theorem hammingDist_ne_zero {x y : ∀ i, β i} : hammingDist x y ≠ 0 ↔ x ≠ y := by
+  constructor
+  · intro hneq hxy
+    have : hammingDist x y = 0 := by
+      simpa [hxy] using (hammingDist_self (x:=x))
+    exact hneq this
+  · intro hneq hzero
+    have : x = y := (hammingDist_eq_zero (x:=x) (y:=y)).mp hzero
+    exact hneq this
 
 /-- Corresponds to `dist_pos`. -/
 @[target, simp]
@@ -151,11 +178,14 @@ def hammingNorm (x : ∀ i, β i) : ℕ := #{i | x i ≠ 0}
 
 /-- Corresponds to `dist_zero_right`. -/
 @[target, simp]
-theorem hammingDist_zero_right (x : ∀ i, β i) : hammingDist x 0 = hammingNorm x := by sorry
+theorem hammingDist_zero_right (x : ∀ i, β i) : hammingDist x 0 = hammingNorm x := by
+  simpa [hammingDist, hammingNorm]
 
 /-- Corresponds to `dist_zero_left`. -/
 @[target, simp]
-theorem hammingDist_zero_left : hammingDist (0 : ∀ i, β i) = hammingNorm := by sorry
+theorem hammingDist_zero_left : hammingDist (0 : ∀ i, β i) = hammingNorm := by
+  -- both sides count the number of non‑zero entries of the zero function, which is zero
+  simp [hammingDist, hammingNorm]
 
 /-- Corresponds to `norm_nonneg`. -/
 @[target]
@@ -299,7 +329,8 @@ theorem toHamming_inj {x y : ∀ i, β i} : toHamming x = toHamming y ↔ x = y 
 theorem ofHamming_inj {x y : Hamming β} : ofHamming x = ofHamming y ↔ x = y := by sorry
 
 @[target, simp]
-theorem toHamming_zero [∀ i, Zero (β i)] : toHamming (0 : ∀ i, β i) = 0 := by sorry
+theorem toHamming_zero [∀ i, Zero (β i)] : toHamming (0 : ∀ i, β i) = 0 := by
+  rfl
 
 @[target, simp]
 theorem ofHamming_zero [∀ i, Zero (β i)] : ofHamming (0 : Hamming β) = 0 := by sorry
