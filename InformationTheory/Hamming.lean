@@ -144,7 +144,8 @@ theorem hammingDist_ne_zero {x y : ∀ i, β i} : hammingDist x y ≠ 0 ↔ x �
 
 /-- Corresponds to `dist_pos`. -/
 @[target, simp]
-theorem hammingDist_pos {x y : ∀ i, β i} : 0 < hammingDist x y ↔ x ≠ y := by sorry
+theorem hammingDist_pos {x y : ∀ i, β i} : 0 < hammingDist x y ↔ x ≠ y := by
+  simpa [Nat.pos_iff_ne_zero] using (hammingDist_ne_zero (x:=x) (y:=y))
 
 @[target]
 theorem hammingDist_lt_one {x y : ∀ i, β i} : hammingDist x y < 1 ↔ x = y := by sorry
