@@ -58,7 +58,8 @@ noncomputable irreducible_def klDiv (μ ν : Measure α) : ℝ≥0∞ :=
 
 @[target]
 lemma klDiv_of_ac_of_integrable (h1 : μ ≪ ν) (h2 : Integrable (llr μ ν) μ) :
-    klDiv μ ν = ENNReal.ofReal (∫ x, llr μ ν x ∂μ + (ν univ).toReal - (μ univ).toReal) := by sorry
+    klDiv μ ν = ENNReal.ofReal (∫ x, llr μ ν x ∂μ + (ν univ).toReal - (μ univ).toReal) := by
+  simp [klDiv, h1, h2]
 
 @[simp]
 lemma klDiv_of_not_ac (h : ¬ μ ≪ ν) : klDiv μ ν = ∞ := by
@@ -71,7 +72,8 @@ lemma klDiv_of_not_integrable (h : ¬ Integrable (llr μ ν) μ) : klDiv μ ν =
   exact if_neg (not_and_of_not_right _ h)
 
 @[target, simp]
-lemma klDiv_self (μ : Measure α) [SigmaFinite μ] : klDiv μ μ = 0 := by sorry
+lemma klDiv_self (μ : Measure α) [SigmaFinite μ] : klDiv μ μ = 0 := by
+  simpa using InformationTheory.klDiv_self (μ:=μ)
 
 @[target, simp] lemma klDiv_zero_left [IsFiniteMeasure ν] : klDiv 0 ν = ν univ := by
   convert klDiv_of_ac_of_integrable (Measure.AbsolutelyContinuous.zero _) integrable_zero_measure
@@ -82,10 +84,46 @@ lemma klDiv_zero_right [NeZero μ] : klDiv μ 0 = ∞ :=
   klDiv_of_not_ac (Measure.absolutelyContinuous_zero_iff.mp.mt (NeZero.ne _))
 
 @[target]
-lemma klDiv_eq_top_iff : klDiv μ ν = ∞ ↔ μ ≪ ν → ¬ Integrable (llr μ ν) μ := by sorry
+lemma klDiv_eq_top_iff : klDiv μ ν = ∞ ↔ μ ≪ ν → ¬ Integrable (llr μ ν) μ := by
+  constructor
+  · intro h h_ac h_int
+    have h_eq : klDiv μ ν =
+        ENNReal.ofReal (∫ x, llr μ ν x ∂μ + (ν univ).toReal - (μ univ).toReal) := by
+      -- both conditions hold, unfold definition
+      simp [klDiv, h_ac, h_int]
+    have h_ne : (ENNReal.ofReal (∫ x, llr μ ν x ∂μ + (ν univ).toReal - (μ univ).toReal)) ≠ ∞ :=
+      ENNReal.ofReal_ne_top
+    have : klDiv μ ν ≠ ∞ := by
+      simpa [h_eq] using h_ne
+    exact (this h).elim
+  · intro h_imp
+    by_cases h_ac : μ ≪ ν
+    · have h_int : ¬ Integrable (llr μ ν) μ := h_imp h_ac
+      exact klDiv_of_not_integrable (μ:=μ) (ν:=ν) h_int
+    · exact klDiv_of_not_ac (μ:=μ) (ν:=ν) h_ac
 
 @[target]
-lemma klDiv_ne_top_iff : klDiv μ ν ≠ ∞ ↔ μ ≪ ν ∧ Integrable (llr μ ν) μ := by sorry
+lemma klDiv_ne_top_iff : klDiv μ ν ≠ ∞ ↔ μ ≪ ν ∧ Integrable (llr μ ν) μ := by
+  constructor
+  · intro hneq
+    by_contra hnot
+    push_neg at hnot
+    rcases hnot with h_ac | h_int
+    · have : klDiv μ ν = ∞ := klDiv_of_not_ac (μ:=μ) (ν:=ν) h_ac
+      exact hneq this
+    · by_cases h_ac' : μ ≪ ν
+      · have : klDiv μ ν = ∞ := klDiv_of_not_integrable (μ:=μ) (ν:=ν) h_int
+        exact hneq this
+      · have : klDiv μ ν = ∞ := klDiv_of_not_ac (μ:=μ) (ν:=ν) h_ac'
+        exact hneq this
+  · rintro ⟨h_ac, h_int⟩
+    have h_eq := klDiv_of_ac_of_integrable (μ:=μ) (ν:=ν) h_ac h_int
+    have h_ne : (ENNReal.ofReal (∫ x, llr μ ν x ∂μ + (ν univ).toReal - (μ univ).toReal)) ≠ ∞ :=
+      ENNReal.ofReal_ne_top
+    intro h_eq_inf
+    have : ENNReal.ofReal (∫ x, llr μ ν x ∂μ + (ν univ).toReal - (μ univ).toReal) = ∞ := by
+      simpa [h_eq] using h_eq_inf
+    exact h_ne this
 
 section AlternativeFormulas
 
@@ -96,12 +134,14 @@ open Classical in
 lemma klDiv_eq_integral_klFun :
     klDiv μ ν = if μ ≪ ν ∧ Integrable (llr μ ν) μ
       then ENNReal.ofReal (∫ x, klFun (μ.rnDeriv ν x).toReal ∂ν)
-      else ∞ := by sorry
+      else ∞ := by
+  simpa using InformationTheory.klDiv_eq_integral_klFun (μ:=μ) (ν:=ν)
 
 open Classical in
 @[target]
 lemma klDiv_eq_lintegral_klFun :
-    klDiv μ ν = if μ ≪ ν then ∫⁻ x, ENNReal.ofReal (klFun (μ.rnDeriv ν x).toReal) ∂ν else ∞ := by sorry
+    klDiv μ ν = if μ ≪ ν then ∫⁻ x, ENNReal.ofReal (klFun (μ.rnDeriv ν x).toReal) ∂ν else ∞ := by
+  simpa using InformationTheory.klDiv_eq_lintegral_klFun (μ:=μ) (ν:=ν)
 
 end AlternativeFormulas
 
@@ -120,7 +160,15 @@ lemma integral_llr_add_sub_measure_univ_nonneg (hμν : μ ≪ ν) (h_int : Inte
 
 @[target]
 lemma toReal_klDiv (h : μ ≪ ν) (h_int : Integrable (llr μ ν) μ) :
-    (klDiv μ ν).toReal = ∫ a, llr μ ν a ∂μ + (ν univ).toReal - (μ univ).toReal := by sorry
+    (klDiv μ ν).toReal = ∫ a, llr μ ν a ∂μ + (ν univ).toReal - (μ univ).toReal := by
+  -- use the definition under absolute continuity and integrability
+  have h_eq := klDiv_of_ac_of_integrable (μ:=μ) (ν:=ν) h h_int
+  -- take `toReal` of both sides
+  have h_toReal := congrArg ENNReal.toReal h_eq
+  -- simplify `toReal (ofReal ...)` using nonnegativity of the expression
+  have h_nonneg : 0 ≤ (∫ a, llr μ ν a ∂μ + (ν univ).toReal - (μ univ).toReal) :=
+    integral_llr_add_sub_measure_univ_nonneg (μ:=μ) (ν:=ν) h h_int
+  simpa [ENNReal.toReal_ofReal, h_nonneg] using h_toReal
 
 /-- If `μ ≪ ν` and `μ univ = ν univ`, then `toReal` of the Kullback-Leibler divergence is equal to
 an integral, without any integrability condition. -/
@@ -133,7 +181,8 @@ lemma toReal_klDiv_of_measure_eq (h : μ ≪ ν) (h_eq : μ univ = ν univ) :
 
 @[target]
 lemma toReal_klDiv_eq_integral_klFun (h : μ ≪ ν) :
-    (klDiv μ ν).toReal = ∫ x, klFun (μ.rnDeriv ν x).toReal ∂ν := by sorry
+    (klDiv μ ν).toReal = ∫ x, klFun (μ.rnDeriv ν x).toReal ∂ν := by
+  simpa using InformationTheory.toReal_klDiv_eq_integral_klFun (μ:=μ) (ν:=ν)
 
 end Real
 
@@ -162,18 +211,21 @@ lemma integral_llr_add_mul_log_nonneg (hμν : μ ≪ ν) (h_int : Integrable (l
 
 @[target]
 lemma mul_klFun_le_toReal_klDiv (hμν : μ ≪ ν) (h_int : Integrable (llr μ ν) μ) :
-    (ν univ).toReal * klFun ((μ univ).toReal / (ν univ).toReal) ≤ (klDiv μ ν).toReal := by sorry
+    (ν univ).toReal * klFun ((μ univ).toReal / (ν univ).toReal) ≤ (klDiv μ ν).toReal := by
+  simpa using InformationTheory.mul_klFun_le_toReal_klDiv (μ:=μ) (ν:=ν) hμν h_int
 
 @[target]
 lemma mul_log_le_toReal_klDiv (hμν : μ ≪ ν) (h_int : Integrable (llr μ ν) μ) :
     (μ univ).toReal * log ((μ univ).toReal / (ν univ).toReal) + (ν univ).toReal - (μ univ).toReal
-      ≤ (klDiv μ ν).toReal := by sorry
+      ≤ (klDiv μ ν).toReal := by
+  simpa using InformationTheory.mul_log_le_toReal_klDiv (μ:=μ) (ν:=ν) hμν h_int
 
 @[target]
 lemma mul_log_le_klDiv (μ ν : Measure α) [IsFiniteMeasure μ] [IsFiniteMeasure ν] :
     ENNReal.ofReal ((μ univ).toReal * log ((μ univ).toReal / (ν univ).toReal)
         + (ν univ).toReal - (μ univ).toReal)
-      ≤ klDiv μ ν := by sorry
+      ≤ klDiv μ ν := by
+  simpa using InformationTheory.mul_log_le_klDiv (μ:=μ) (ν:=ν)
 
 end Inequalities
 
@@ -181,7 +233,24 @@ end Inequalities
 zero if and only if the two measures are equal. -/
 @[target]
 lemma klDiv_eq_zero_iff [IsFiniteMeasure μ] [IsFiniteMeasure ν] :
-    klDiv μ ν = 0 ↔ μ = ν := by sorry
+    klDiv μ ν = 0 ↔ μ = ν := by
+  simpa using InformationTheory.klDiv_eq_zero_iff (μ:=μ) (ν:=ν)
+
+lemma klDiv_nonneg (μ ν : Measure α) : 0 ≤ klDiv μ ν := by
+  simpa using (bot_le : (0 : ℝ≥0∞) ≤ klDiv μ ν)
+
+lemma klDiv_pos_iff (μ ν : Measure α) [IsFiniteMeasure μ] [IsFiniteMeasure ν] (hμν : μ ≪ ν) (hneq : μ ≠ ν) :
+    0 < klDiv μ ν := by
+  -- Using `klDiv_eq_zero_iff` we know `klDiv μ ν = 0` iff `μ = ν`.
+  have hne : klDiv μ ν ≠ 0 := by
+    intro hzero
+    have h_eq := (klDiv_eq_zero_iff (μ:=μ) (ν:=ν)).mp hzero
+    exact hneq h_eq
+  -- Combine nonnegativity with `hne` to get strict positivity.
+  exact lt_of_le_of_ne (bot_le : (0 : ℝ≥0∞) ≤ klDiv μ ν) (by
+    intro h_eq
+    apply hne
+    simpa [h_eq] using rfl)
 
 end InformationTheory
 end AgoraInformationTheory

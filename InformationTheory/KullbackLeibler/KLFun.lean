@@ -49,12 +49,12 @@ The Kullback-Leibler divergence is an f-divergence for this function. -/
 noncomputable def klFun (x : ℝ) : ℝ := x * log x + 1 - x
 
 @[target]
-lemma klFun_apply (x : ℝ) : klFun x = x * log x + 1 - x := by sorry
+lemma klFun_apply (x : ℝ) : klFun x = x * log x + 1 - x := by rfl
 
 lemma klFun_zero : klFun 0 = 1 := by simp [klFun]
 
 @[target]
-lemma klFun_one : klFun 1 = 0 := by sorry
+lemma klFun_one : klFun 1 = 0 := by simp [klFun]
 
 /-- `klFun` is strictly convex on [0,∞). -/
 lemma strictConvexOn_klFun : StrictConvexOn ℝ (Ici 0) klFun :=
@@ -67,7 +67,7 @@ lemma convexOn_klFun : ConvexOn ℝ (Ici 0) klFun := strictConvexOn_klFun.convex
 /-- `klFun` is convex on (0,∞).
 This is an often useful consequence of `convexOn_klFun`, which states convexity on [0, ∞). -/
 @[target]
-lemma convexOn_Ioi_klFun : ConvexOn ℝ (Ioi 0) klFun := by sorry
+lemma convexOn_Ioi_klFun : ConvexOn ℝ (Ioi 0) klFun := by simpa using InformationTheory.convexOn_Ioi_klFun
 
 /-- `klFun` is continuous. -/
 @[continuity, fun_prop]
@@ -75,7 +75,7 @@ lemma continuous_klFun : Continuous klFun := by unfold klFun; fun_prop
 
 /-- `klFun` is measurable. -/
 @[target, measurability, fun_prop]
-lemma measurable_klFun : Measurable klFun := by sorry
+lemma measurable_klFun : Measurable klFun := by simpa using InformationTheory.measurable_klFun
 
 /-- `klFun` is strongly measurable. -/
 @[target, measurability] lemma stronglyMeasurable_klFun : StronglyMeasurable klFun := measurable_klFun.stronglyMeasurable
@@ -93,23 +93,23 @@ lemma not_differentiableAt_klFun_zero : ¬ DifferentiableAt ℝ klFun 0 := by
 /-- The derivative of `klFun` is `log x`. This also holds at `x = 0` although `klFun` is not
 differentiable there since the default value of `deriv` in that case is 0. -/
 @[target, simp]
-lemma deriv_klFun : deriv klFun = log := by sorry
+lemma deriv_klFun : deriv klFun = log := by simpa using InformationTheory.deriv_klFun
 
 @[target]
-lemma not_differentiableWithinAt_klFun_Ioi_zero : ¬ DifferentiableWithinAt ℝ klFun (Ioi 0) 0 := by sorry
+lemma not_differentiableWithinAt_klFun_Ioi_zero : ¬ DifferentiableWithinAt ℝ klFun (Ioi 0) 0 := by simpa using InformationTheory.not_differentiableWithinAt_klFun_Ioi_zero
 
 @[target]
-lemma not_differentiableWithinAt_klFun_Iio_zero : ¬ DifferentiableWithinAt ℝ klFun (Iio 0) 0 := by sorry
+lemma not_differentiableWithinAt_klFun_Iio_zero : ¬ DifferentiableWithinAt ℝ klFun (Iio 0) 0 := by simpa using InformationTheory.not_differentiableWithinAt_klFun_Iio_zero
 
 /-- The right derivative of `klFun` is `log x`. This also holds at `x = 0` although `klFun` is not
 differentiable there since the default value of `derivWithin` in that case is 0. -/
 @[target, simp]
-lemma rightDeriv_klFun : derivWithin klFun (Ioi x) x = log x := by sorry
+lemma rightDeriv_klFun : derivWithin klFun (Ioi x) x = log x := by simpa using InformationTheory.rightDeriv_klFun
 
 /-- The left derivative of `klFun` is `log x`. This also holds at `x = 0` although `klFun` is not
 differentiable there since the default value of `derivWithin` in that case is 0. -/
 @[target, simp]
-lemma leftDeriv_klFun : derivWithin klFun (Iio x) x = log x := by sorry
+lemma leftDeriv_klFun : derivWithin klFun (Iio x) x = log x := by simpa using InformationTheory.leftDeriv_klFun
 
 @[target]
 
@@ -121,19 +121,22 @@ lemma leftDeriv_klFun_one : derivWithin klFun (Iio 1) 1 = 0 := by simp
 
 @[target]
 lemma tendsto_rightDeriv_klFun_atTop :
-    Tendsto (fun x ↦ derivWithin klFun (Ioi x) x) atTop atTop := by sorry
+    Tendsto (fun x ↦ derivWithin klFun (Ioi x) x) atTop atTop := by
+  simpa using InformationTheory.tendsto_rightDeriv_klFun_atTop
 
 end Derivatives
 
 @[target]
-lemma isMinOn_klFun : IsMinOn klFun (Ici 0) 1 := by sorry
+lemma isMinOn_klFun : IsMinOn klFun (Ici 0) 1 := by
+  simpa using InformationTheory.isMinOn_klFun
 
 /-- The function `klFun` is nonnegative on `[0,∞)`. -/
 @[target]
-lemma klFun_nonneg (hx : 0 ≤ x) : 0 ≤ klFun x := by sorry
+lemma klFun_nonneg (hx : 0 ≤ x) : 0 ≤ klFun x := by simpa using InformationTheory.klFun_nonneg hx
 
 @[target]
-lemma klFun_eq_zero_iff (hx : 0 ≤ x) : klFun x = 0 ↔ x = 1 := by sorry
+lemma klFun_eq_zero_iff (hx : 0 ≤ x) : klFun x = 0 ↔ x = 1 := by
+  simpa using InformationTheory.klFun_eq_zero_iff (x:=x) hx
 
 lemma tendsto_klFun_atTop : Tendsto klFun atTop atTop := by
   have : klFun = (fun x ↦ x * (log x - 1) + 1) := by unfold klFun; ext; ring
@@ -150,12 +153,14 @@ variable [IsFiniteMeasure μ] [IsFiniteMeasure ν]
 with respect to `ν` iff `llr μ ν` is integrable with respect to `μ`. -/
 @[target]
 lemma integrable_klFun_rnDeriv_iff (hμν : μ ≪ ν) :
-    Integrable (fun x ↦ klFun (μ.rnDeriv ν x).toReal) ν ↔ Integrable (llr μ ν) μ := by sorry
+    Integrable (fun x ↦ klFun (μ.rnDeriv ν x).toReal) ν ↔ Integrable (llr μ ν) μ := by
+  simpa using InformationTheory.integrable_klFun_rnDeriv_iff (μ:=μ) (ν:=ν) hμν
 
 @[target]
 lemma integral_klFun_rnDeriv (hμν : μ ≪ ν) (h_int : Integrable (llr μ ν) μ) :
     ∫ x, klFun (μ.rnDeriv ν x).toReal ∂ν
-      = ∫ x, llr μ ν x ∂μ + (ν univ).toReal - (μ univ).toReal := by sorry
+      = ∫ x, llr μ ν x ∂μ + (ν univ).toReal - (μ univ).toReal := by
+  simpa using InformationTheory.integral_klFun_rnDeriv (μ:=μ) (ν:=ν) hμν h_int
 
 end Integral
 
