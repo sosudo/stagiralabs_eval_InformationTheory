@@ -54,7 +54,27 @@ theorem hammingDist_comm (x y : ∀ i, β i) : hammingDist x y = hammingDist y x
 /-- Corresponds to `dist_triangle`. -/
 @[target]
 theorem hammingDist_triangle (x y z : ∀ i, β i) :
-    hammingDist x z ≤ hammingDist x y + hammingDist y z := by sorry
+    hammingDist x z ≤ hammingDist x y + hammingDist y z := by
+  dsimp [hammingDist]
+  have hsubset :
+      ({i | x i ≠ z i} : Finset ι) ⊆
+        ({i | x i ≠ y i} ∪ {i | y i ≠ z i} : Finset ι) := by
+    intro i hi
+    by_cases hxy : x i = y i
+    · have hyz : y i ≠ z i := by
+        intro h
+        apply hi
+        simpa [hxy] using h
+      exact Or.inr hyz
+    · exact Or.inl hxy
+  have hcard_le : (#{i | x i ≠ z i}) ≤
+      (({i | x i ≠ y i} ∪ {i | y i ≠ z i} : Finset ι).card) := by
+    exact Finset.card_le_of_subset hsubset
+  have hcard_union_le :
+      (({i | x i ≠ y i} ∪ {i | y i ≠ z i} : Finset ι).card) ≤
+        (#{i | x i ≠ y i}) + (#{i | y i ≠ z i}) :=
+    Finset.card_union_le
+  exact le_trans hcard_le hcard_union_le
 
 /-- Corresponds to `dist_triangle_left`. -/
 @[target]
