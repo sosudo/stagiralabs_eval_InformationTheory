@@ -79,7 +79,11 @@ theorem hammingDist_triangle (x y z : ∀ i, β i) :
 /-- Corresponds to `dist_triangle_left`. -/
 @[target]
 theorem hammingDist_triangle_left (x y z : ∀ i, β i) :
-    hammingDist x y ≤ hammingDist z x + hammingDist z y := by sorry
+    hammingDist x y ≤ hammingDist z x + hammingDist z y := by
+  -- use symmetry of distance and the standard triangle inequality
+  have h := hammingDist_triangle (y) (z) (x)
+  -- rewrite using commutativity of hammingDist and addition
+  simpa [hammingDist_comm, add_comm, add_left_comm, add_assoc] using h
 
 /-- Corresponds to `dist_triangle_right`. -/
 @[target]
