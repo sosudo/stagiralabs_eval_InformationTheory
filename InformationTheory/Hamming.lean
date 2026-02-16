@@ -69,7 +69,14 @@ theorem hammingDist_triangle_right (x y z : ∀ i, β i) :
 
 /-- Corresponds to `swap_dist`. -/
 @[target]
-theorem swap_hammingDist : swap (@hammingDist _ β _ _) = hammingDist := by sorry
+theorem swap_hammingDist : swap (@hammingDist _ β _ _) = hammingDist := by
+  funext x y
+  dsimp [hammingDist, swap]
+  have h : (Finset.univ.filter fun i => y i ≠ x i) = (Finset.univ.filter fun i => x i ≠ y i) := by
+    apply Finset.filter_congr
+    intro i hi
+    simp [ne_comm]
+  simpa [h]
 
 /-- Corresponds to `eq_of_dist_eq_zero`. -/
 @[target]
