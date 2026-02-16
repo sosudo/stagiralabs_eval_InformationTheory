@@ -77,7 +77,28 @@ theorem eq_of_hammingDist_eq_zero {x y : ∀ i, β i} : hammingDist x y = 0 → 
 
 /-- Corresponds to `dist_eq_zero`. -/
 @[target, simp]
-theorem hammingDist_eq_zero {x y : ∀ i, β i} : hammingDist x y = 0 ↔ x = y := by sorry
+theorem hammingDist_eq_zero {x y : ∀ i, β i} : hammingDist x y = 0 ↔ x = y := by
+  classical
+  dsimp [hammingDist]
+  constructor
+  · intro h
+    have hempty : (Finset.univ.filter fun i => x i ≠ y i) = (∅ : Finset ι) :=
+      (Finset.card_eq_zero).1 h
+    funext i
+    have : ¬ (x i ≠ y i) := by
+      intro hneq
+      have : i ∈ (Finset.univ.filter fun i => x i ≠ y i) :=
+        Finset.mem_filter.2 ⟨Finset.mem_univ i, hneq⟩
+      have : i ∈ (∅ : Finset ι) := by
+        simpa [hempty] using this
+      exact Finset.not_mem_empty _ this
+    exact not_not.mp (by
+      have : x i = y i := by
+        by_contra hneq
+        exact this hneq
+      exact this)
+  · intro hxy
+    simpa [hxy] using (hammingDist_self (x := x))
 
 /-- Corresponds to `zero_eq_dist`. -/
 @[target, simp]
